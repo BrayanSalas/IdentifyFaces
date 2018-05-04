@@ -2,7 +2,12 @@ from tkinter import *
 import os, sys
 from PIL import Image
 import tensorflow as tf
+import cv2
+import time
+def Cerrar():
+    exit()
 def TomarFoto():
+    
     #Declarando el grado de mensajes que mandará la consola, el nivel 2 añade "WARNING" como filtro de los log error.
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
@@ -57,7 +62,7 @@ def TomarFoto():
             puntuacion.append(score)
             i = i + 1
         #Comparacion de puntuaciones segun la predicción(SI SE AGREGAN MAS CARPETAS, CAMBIAR EL NUMERO DE 0 HASTA EL NUMERO DE CARPETAS)
-        for i in range(0, 3):
+        for i in range(0, 2):
             if(puntuacion[i] > auxPuntuacion):
                 auxPuntuacion = puntuacion[i]
                 auxNombre = nombre[i]
@@ -73,7 +78,7 @@ usuario = StringVar()
 editTextUser = Entry(ventana, textvariable=usuario).place(x=70, y=0)
 
 btnTomarFoto = Button(ventana, command=TomarFoto,text="Reconocimiento Facial").place(x=0, y=70)
-btnAceptar = Button(ventana, text="Aceptar").place(x=100, y=120)
+btnAceptar = Button(ventana, command=Cerrar, text="Cerrar").place(x=0, y=120)
 
 
 
