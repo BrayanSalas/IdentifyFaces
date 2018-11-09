@@ -1,11 +1,29 @@
 from tkinter import *
+import tkinter as tk
+from tkinter import Tk
+from tkinter.filedialog import askopenfilename
 from tkinter import messagebox
 import os, sys
 from PIL import Image
 import tensorflow as tf
 import cv2
 import time
-root = Tk()
+from firebaseUtil import StorageFb
+from camaraWeb import CamaraWeb
+
+def SubirArchivo():
+    Tk().withdraw()
+    filename = askopenfilename()
+    StorageFb.upload_file(filename)
+
+def DescargarArchivo():
+    filename = v.get()
+    StorageFb.download_file(filename)
+
+def BorrarArchivo():
+    filename = v.get()
+    StorageFb.delete_file(filename)
+
 def Informacion():
     text1 = Text(root, height=20, width=30)
     photo=PhotoImage(file='./foto.gif')
@@ -41,17 +59,16 @@ def TomarFoto():
     #Declarando el grado de mensajes que mandará la consola, el nivel 2 añade "WARNING" como filtro de los log error.
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
-    # Obtiene el valor ingresado por el usuario despues de la ejecución
-    # Por ejemplo: python identify_guitars.py image.jpg
-    # El argumento de ruta sería image.jpg
+    CamaraWeb.tomarFoto()
+    # Si necesitas validar para entrar como usuario reconocido, descomenta la linea de abajo y comenta la 65 y 62
+    #ruta = "./Raspberry/foto.jpg"
     ruta = "foto.jpg"
     #Abre la imagen, en caso de que no se encuentre, manda el tipo de error y dice el error al usuario.
     try:
         abrirImagen = Image.open(ruta)
-        abrirImagen.show()    
     except OSError as err:
         print("OS error: {0}".format(err))
-        print("NO SE ENCUENTRA EL ARCHIVO SOLICITADO")
+        messagebox.showerror("Error", "Error en la foto intente denuevo")
 
     # Se lee la imagen dicha anteriormente con la ejecución del código
     image_data = tf.gfile.FastGFile(ruta, 'rb').read()
@@ -99,23 +116,64 @@ def TomarFoto():
         #Imprime la marca 
         print('La persona es: %s y su porcentaje de acierto es de: %.5f' % (auxNombre.capitalize(), auxPuntuacion))
         usuario.set(auxNombre.capitalize())
+        global usuarioReconocido
         if(auxPuntuacion < 0.95):
                 messagebox.showerror("Error", "Usuario no autorizado, intente denuevo")
+                usuarioReconocido = False
         else:
                 usuario.set(auxNombre.capitalize())
-                messagebox.showinfo("Bienvenido", "Usuario autorizado")
+                messagebox.showinfo("Bienvenido", "Usuario autorizado, presione subir/borrar archivos para iniciar")
+                usuarioReconocido = True
+    
+def ventanaCaja():
+    try:
+        if (usuarioReconocido):
+            # Creacion de la nueva ventana y su config
+            global toplevel
+            toplevel = Toplevel()
+            toplevel.title('Menu')
+            toplevel.geometry('800x500')
+            
+            # Menu archivos
+            menu = Menu(toplevel)
+            toplevel.config(menu=menu)
+            filemenu = Menu(menu)
+            menu.add_cascade(label='Acciones', menu=filemenu)
+            filemenu.add_command(label='Subir archivo', command=SubirArchivo)
+            filemenu.add_separator() 
+            filemenu.add_command(label='Salir', command=toplevel.quit)
+            
+            # Interfaz
+            label = tk.Label(toplevel, text="Subir/Borrar archivos", fg='blue').pack(anchor=W)
+            arrayFiles = StorageFb.get_files()
+            for arr in arrayFiles:
+                tk.Radiobutton(toplevel, text=arr, variable=v, value=arr).pack(anchor=W)
+            btnBorrar = tk.Button(toplevel, command=BorrarArchivo, text="Borrar archivo").place(x=250, y=50)
+            btnDescargar = tk.Button(toplevel, command=DescargarArchivo, text="Descargar archivo").place(x=400, y=50)
 
-ventana = Frame(height=150, width=375)
+            # Darle el enfoque a la ventana
+            toplevel.focus_set()
+        else:
+            messagebox.showerror("Error", "Usuario no reconocido, vuelve a usar Reconocimiento Facial")
+    except:
+        messagebox.showerror("Error", "Usuario no autorizado, identificate en Reconocimiento facial")
+
+# Configuracion de la interfaz principal
+root = tk.Tk()
+root.title('Reconocimiento facial')
+ventana = Frame(height=160, width=420)
 ventana.pack(padx=20,pady=20)
 
-textViewUser = Label(text="Bienvenido al sistema de reconocimiento facial", font=("Arial", 15)).place(x=205,y=15, anchor="center")
-
+# Variables de entorno
 usuario = StringVar()
-editTextUser = Entry(ventana, textvariable=usuario).place(x=130, y=40)
+archivo = StringVar()
+v = StringVar()
 
-btnTomarFoto = Button(ventana, command=TomarFoto,text="Reconocimiento Facial").place(x=126, y=70)
-btnInformacion = Button(ventana, command=Informacion, text="Leeme").place(x=167, y=120)
-
-
+# Interfaz principal
+textViewUser = tk.Label(ventana, text="Bienvenido al sistema de reconocimiento facial", font=("Arial", 15)).place(x=205,y=15, anchor="center")
+editTextUser = tk.Entry(ventana, textvariable=usuario).place(x=130, y=40)
+btnTomarFoto = tk.Button(ventana, command=TomarFoto,text="Reconocimiento Facial").place(x=126, y=70)
+btnSubirBorrar = tk.Button(ventana, command=ventanaCaja,text="Subir/Borrar Archivos").place(x=126, y=100)
+btnInformacion = tk.Button(ventana, command=Informacion, text="Leeme").place(x=167, y=130)
 
 ventana.mainloop()
