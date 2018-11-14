@@ -1,0 +1,2 @@
+Deberas de elegir bien el path de las fotos (ultimo parametro del comando, image_dir)
+python retrain.py --bottlenecks_dir=bottlenecks --how_many_training_steps=500 -model_dir=inception --sumaries_dir=training_sumaries/long --output_graph=retrained_graph.pb -output_labels=retrained_labels.txt --image_dir=face_photos 

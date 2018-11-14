@@ -115,7 +115,7 @@ def TomarFoto():
                 auxNombre = nombre[i]
         #Imprime la marca 
         print('La persona es: %s y su porcentaje de acierto es de: %.5f' % (auxNombre.capitalize(), auxPuntuacion))
-        usuario.set(auxNombre.capitalize())
+        
         global usuarioReconocido
         if(auxPuntuacion < 0.95):
                 messagebox.showerror("Error", "Usuario no autorizado, intente denuevo")

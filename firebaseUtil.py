@@ -13,7 +13,7 @@ class StorageFb:
         "projectId": "identify-faces",
         "storageBucket": "identify-faces.appspot.com",
         "messagingSenderId": "327186042515",
-        "serviceAccount": "C:/Users/braya/Documents/Archive-9a29/prueba/serviceAccount.json"
+        "serviceAccount": "./utils/serviceAccount.json"
     }
     firebase = pyrebase.initialize_app(config)
     global storage
@@ -31,7 +31,7 @@ class StorageFb:
                 else:
                     array.append(formatName)
         except:
-            messagebox.showerror("Borrar archivo", "No se pudo realizar, revise su conexion a internet")
+            messagebox.showerror("Obtener archivos", "No se pudo realizar, revise su conexion a internet")
         return array
 
     def delete_file(filename):
@@ -62,7 +62,7 @@ class StorageFb:
 
     def download_file(filename):
         try:
-            storage.child("Archivos/" + filename).download("C:/Users/braya/Downloads/" + filename)
+            storage.child("Archivos/" + filename).download("./Downloads/" + filename)
             messagebox.showinfo("Descarga de archivo", "Archivo descargado con exito en Downloads")
         except:
             messagebox.showerror("Descarga de archivo", "No se pudo realizar, revise su conexion a internet")
